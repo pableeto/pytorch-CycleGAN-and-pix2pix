@@ -6,6 +6,7 @@ from torch.optim import lr_scheduler
 from mmdet.ops.dcn import ModulatedDeformConvPack as deform_conv_v2
 from mmdet.ops.dcn import DeformConvPack as deform_conv_v1
 
+from typing import Union, List
 
 ###############################################################################
 # Helper Functions
@@ -374,6 +375,31 @@ class ResnetGenerator(nn.Module):
         """Standard forward"""
         return self.model(input)
 
+class MixConv(nn.Module):
+
+    def __init__(self, 
+                in_channels: int, 
+                out_channels: int, 
+                kernel_size: Union[int, tuple], 
+                stride: Union[int, tuple] = 1,
+                padding: Union[int, tuple] = 0,
+                dilation: Union[int, tuple] = 1,
+                groups: int = 1,
+                bias: bool = True,
+                padding_mode: str = 'zeros'):
+
+        out_channels_dcn = out_channels // 2
+        out_channels_normal = out_channels - out_channels_dcn
+
+        self.conv_layer = nn.Conv2d(in_channels, out_channels_normal, kernel_size, stride, padding, dilation, groups, bias, padding_mode)
+        self.dcn_layer = deform_conv_v1(in_channels, out_channels_dcn, kernel_size, stride, padding, dilation, groups, bias)
+
+    def forward(self, _input):
+        conv_out = self.conv_layer(_input)
+        dcn_out = self.dcn_layer(_input)
+        
+        output = torch.cat([conv_out, dcn_out], dim = 1)
+        return output
 
 class ResnetBlock(nn.Module):
     """Define a Resnet block"""
@@ -418,6 +444,8 @@ class ResnetBlock(nn.Module):
             conv_func = deform_conv_v1
         elif(conv_type == 'dcn_v2'):
             conv_func = deform_conv_v2
+        elif(conv_type == 'mixed'):
+            conv_func = MixConv
         else:
             raise NotImplementedError('padding [%s] is not implemented' % conv_type)
 
