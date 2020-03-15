@@ -387,6 +387,7 @@ class MixConv(nn.Module):
                 groups: int = 1,
                 bias: bool = True,
                 padding_mode: str = 'zeros'):
+        super(MixConv, self).__init__()
 
         out_channels_dcn = out_channels // 2
         out_channels_normal = out_channels - out_channels_dcn
