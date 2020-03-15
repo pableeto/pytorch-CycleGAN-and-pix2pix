@@ -3,7 +3,7 @@ import torch.nn as nn
 from torch.nn import init
 import functools
 from torch.optim import lr_scheduler
-from mmdet.ops.dcn import deform_conv
+from mmdet.ops.dcn import ModulatedDeformConvPack as deform_conv
 
 ###############################################################################
 # Helper Functions
@@ -413,7 +413,7 @@ class ResnetBlock(nn.Module):
         if(conv_type == 'conv2d'):
             conv_func = nn.Conv2d
         elif(conv_type == 'dcn_v2'):
-            conv_func = deform_conv.ModulatedDeformConvPack
+            conv_func = deform_conv
         else:
             raise NotImplementedError('padding [%s] is not implemented' % conv_type)
 
