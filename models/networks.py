@@ -391,10 +391,11 @@ class MixConv(nn.Module):
 
         out_channels_dcn = out_channels // 2
         out_channels_normal = out_channels - out_channels_dcn
-        print(out_channels_dcn, out_channels_normal)
 
-        self.conv_layer = nn.Conv2d(in_channels, out_channels_normal, kernel_size, stride, padding, dilation, groups, bias, padding_mode)
-        self.dcn_layer = deform_conv_v1(in_channels, out_channels_dcn, kernel_size, stride, padding, dilation, groups, bias)
+        self.conv_layer = nn.Conv2d(in_channels, out_channels_normal, 
+                                    kernel_size = kernel_size, stride = stride, padding = padding, dilation = dilation, groups = groups, bias = bias)
+        self.dcn_layer = deform_conv_v1(in_channels, out_channels_dcn, 
+                                        kernel_size = kernel_size, stride = stride, padding = padding, dilation = dilation, groups = groups, bias = bias)
 
     def forward(self, _input):
         conv_out = self.conv_layer(_input)
